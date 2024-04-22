@@ -10,19 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: SSH into EC2 Instance
-      - uses: actions/checkout@v2
-        env:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-        
-        
-      - name: Deploy static site to S3 bucket
         run: |
           echo "$private_key" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${username}@$(host} '
-
+          ssh -o StrictHostKeyChecking=no -i private_key ${username}@${host} '
             cd /home/ubuntu/tws-portfolio &&
             git checkout dev &&
             git fetch --all &&
@@ -32,4 +26,8 @@ jobs:
             sudo npm run build &&
             sudo pm2 stop ./dist/index.js &&
             sudo pm2 start ./dist/index.js
-            '
+          '
+        env:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          private_key: ${{ secrets.SSH_PRIVATE_KEY }}
