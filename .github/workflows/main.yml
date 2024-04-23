@@ -1,33 +1,24 @@
-name: Portfolio Deployment
+name: EC2 Deployment
 
 on:
   push:
     branches:
-    - main
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v1
 
-      - name: SSH into EC2 Instance
-        run: |
-          echo "$private_key" > private_key && chmod 600 private_key
-          ssh -vvv -o StrictHostKeyChecking=no -i private_key ${username}@${host} '
-            cd /home/ubuntu/tws-portfolio &&
-            git checkout dev &&
-            git fetch --all &&
-            git reset --hard origin/main &&
-            git pull origin dev &&
-            sudo npm i &&
-            sudo npm run build &&
-            sudo pm2 stop ./dist/index.js &&
-            sudo pm2 start ./dist/index.js
-          '
-        env:
+      - name: SSH into EC2 instance
+        uses: appleboy/ssh-action@master
+        with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
-          private_key: ${{ secrets.PRIVATE_KEY }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          
+      - name: Deploy to EC2 instance
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.PRIVATE_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'bash -s' < deploy_script.sh
