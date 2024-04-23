@@ -16,7 +16,7 @@ jobs:
       - name: SSH into EC2 Instance
         run: |
           echo "$private_key" > private_key && chmod 600 private_key
-          ssh -vvv -o StrictHostKeyChecking=no -i private_key ${username}@${host} '
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
             cd /home/ubuntu/tws-portfolio &&
             git checkout dev &&
             git fetch --all &&
@@ -30,4 +30,4 @@ jobs:
         env:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
-          private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
